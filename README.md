@@ -4,6 +4,7 @@
 
 ### A tiny, fully-reproducible **Joint-Embedding Predictive Architecture** world model — that learns the physics of a bouncing DVD logo in representation space, dreams its future, and detects anomalies. Trains on a **CPU in ~10 seconds**.
 
+[![Paper (PDF)](https://img.shields.io/badge/📄_paper-PDF-b31b1b)](paper/main.pdf)
 [![Live demo](https://img.shields.io/badge/▶_live_demo-run_in_browser-2bd4ff)](https://dvd-jepa.vercel.app)
 [![Open in Colab](https://img.shields.io/badge/Colab-train_it_yourself-F9AB00?logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/mandarwagh9/dvd-jepa/blob/main/notebooks/dvd_jepa.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -28,6 +29,17 @@ Most attempts to learn a **world model** from video try to predict the next fram
 3. **It is useful.** Run it as a 1-step predictive monitor and the prediction error becomes an **anomaly signal**: inject a teleport and surprise spikes **88×** over baseline, on the right frame.
 
 The whole thing runs **client-side in your browser** at [dvd-jepa.vercel.app](https://dvd-jepa.vercel.app) — the trained MLPs are re-implemented in ~40 lines of JavaScript. It is a joke and it is also a correct, working instance of the architecture behind I-JEPA, V-JEPA, and V-JEPA 2.
+
+## 📄 Paper
+
+There's a full arXiv-style write-up (method, anti-collapse ablation, forecast-horizon curve, anomaly detection, references): **[`paper/main.pdf`](paper/main.pdf)** — also attached to the [latest release](https://github.com/mandarwagh9/dvd-jepa/releases/latest).
+
+The paper is fully reproducible: [`paper/main.tex`](paper/main.tex) is the LaTeX source and [`paper/figures.py`](paper/figures.py) regenerates every figure and number in it.
+
+```bash
+python paper/figures.py     # regenerate figures + metrics.tex
+tectonic paper/main.tex     # compile the PDF (any LaTeX engine works)
+```
 
 ## The idea in one picture
 

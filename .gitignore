@@ -10,6 +10,13 @@ _*.png
 web/_*.py
 /tmp/
 
+# latex build intermediates (we DO commit paper/main.pdf)
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+
 # NOTE: we intentionally COMMIT these so the project is self-contained and the
 # live demo works without retraining:
 #   web/weights.json   checkpoints/dvd_jepa.pt   assets/*
