@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DVD-JEPA — a world model that dreams a bouncing logo</title>
+    <meta
+      name="description"
+      content="A tiny but real Joint-Embedding Predictive Architecture (JEPA) world model, running entirely in your browser. Watch it predict the future of a bouncing DVD logo, render its dream, and detect anomalies."
+    />
+    <style>
+      :root {
+        --bg: #0c0d12;
+        --panel: #14151c;
+        --line: #23252f;
+        --txt: #e6e7ee;
+        --dim: #888c9b;
+        --accent: #2bd4ff;
+        --warn: #ff5d5d;
+        --good: #54e08a;
+        --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(120% 80% at 50% -10%, #15171f 0%, var(--bg) 60%);
+        color: var(--txt);
+        font: 15px/1.55 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 80px; }
+      header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+      .badge {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border: 1px solid #1d3a44;
+        background: #0e1a1e;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+      h1 { font-size: 30px; margin: 14px 0 6px; letter-spacing: -0.02em; }
+      h1 .by { color: var(--dim); font-weight: 400; }
+      .abstract { color: var(--dim); max-width: 70ch; }
+      nav { margin-top: 14px; display: flex; gap: 18px; font-family: var(--mono); font-size: 13px; }
+
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px;
+      }
+      .panel { display: flex; flex-direction: column; gap: 8px; }
+      .panel h3 {
+        margin: 0;
+        font: 600 12px/1 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      canvas.view {
+        width: 100%;
+        aspect-ratio: 1;
+        image-rendering: pixelated;
+        background: #000;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+      }
+      .tag { font-family: var(--mono); font-size: 10px; padding: 2px 6px; border-radius: 5px; }
+      .tag.real { color: #d6d8e0; background: #20222b; }
+      .tag.dream { color: #061318; background: var(--accent); }
+
+      .meters { margin-top: 16px; display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+      .card h4 { margin: 0 0 8px; font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+      #latent { width: 100%; height: 54px; display: block; }
+      #spark { width: 100%; height: 80px; display: block; }
+      .readout { font-family: var(--mono); font-size: 13px; color: var(--dim); display: flex; justify-content: space-between; }
+      .readout b { color: var(--txt); font-weight: 600; }
+      .alarm { color: var(--warn); font-weight: 700; visibility: hidden; }
+      .alarm.on { visibility: visible; }
+
+      .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+      button {
+        font: 600 13px/1 var(--mono);
+        color: var(--txt);
+        background: #1b1d26;
+        border: 1px solid var(--line);
+        padding: 9px 13px;
+        border-radius: 9px;
+        cursor: pointer;
+      }
+      button:hover { border-color: #3a3d4b; background: #20222d; }
+      button.primary { background: var(--accent); color: #061318; border-color: var(--accent); }
+      button.warn { color: var(--warn); border-color: #3a2230; }
+      .toggle { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 13px; color: var(--dim); }
+      .switch { width: 38px; height: 22px; border-radius: 999px; background: #2a2c37; position: relative; transition: 0.15s; border: 1px solid var(--line); }
+      .switch.on { background: var(--accent); }
+      .switch i { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #0c0d12; transition: 0.15s; }
+      .switch.on i { left: 18px; background: #061318; }
+      input[type="range"] { accent-color: var(--accent); }
+
+      .explain { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .explain .card p { margin: 6px 0 0; color: var(--dim); font-size: 13.5px; }
+      .explain .num { font-family: var(--mono); color: var(--accent); font-size: 12px; }
+      .note { margin-top: 28px; color: var(--dim); font-size: 13.5px; border-left: 2px solid var(--line); padding-left: 14px; }
+      footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 18px; color: var(--dim); font-size: 13px; }
+      code { font-family: var(--mono); background: #16171f; padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+      @media (max-width: 720px) {
+        .stage, .meters, .explain { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="badge">JEPA · world model · runs in your browser</span>
+        <h1>DVD-JEPA <span class="by">— a world model that dreams a bouncing logo</span></h1>
+        <p class="abstract">
+          A small but <em>real</em> Joint-Embedding Predictive Architecture: a context encoder, an
+          EMA target encoder, and a predictor that imagines the future <strong>in representation
+          space</strong>. It learned the physics of a bouncing DVD logo without ever being told a
+          coordinate. The decoder is optional — a pure JEPA only speaks in vectors. Everything below
+          is the trained model running client-side; no server, no GPU.
+        </p>
+        <nav>
+          <a href="#how">How it works</a>
+          <a href="../README.md">Paper</a>
+          <a id="gh" href="#">Code</a>
+          <a href="#how">The pure-JEPA joke</a>
+        </nav>
+      </header>
+
+      <div class="stage">
+        <div class="panel">
+          <h3><span>Reality</span><span class="tag real">ground truth</span></h3>
+          <canvas class="view" id="real" width="16" height="16"></canvas>
+        </div>
+        <div class="panel">
+          <h3><span id="dreamLabel">JEPA's expectation</span><span class="tag dream" id="dreamTag">decoded</span></h3>
+          <canvas class="view" id="dream" width="16" height="16"></canvas>
+        </div>
+      </div>
+
+      <div class="meters">
+        <div class="card">
+          <h4>Predictive surprise (reality vs. expectation)</h4>
+          <canvas id="spark"></canvas>
+          <div class="readout">
+            <span>surprise: <b id="surpVal">—</b></span>
+            <span class="alarm" id="alarm">⚠ ANOMALY DETECTED</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>The model's mind — 32-d latent z</h4>
+          <canvas id="latent"></canvas>
+          <div class="readout"><span id="mode">mode: monitor</span><span id="fps"></span></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="play">⏸ Pause</button>
+        <button id="reset">↻ New world</button>
+        <button class="warn" id="anom">⚡ Inject anomaly</button>
+        <button id="dreamAhead">💭 Dream 30 steps ahead</button>
+        <label class="toggle" id="decToggle">
+          <span class="switch on" id="decSwitch"><i></i></span> Decoder
+        </label>
+        <label class="toggle">
+          speed
+          <input type="range" id="speed" min="2" max="20" value="9" />
+        </label>
+      </div>
+
+      <div class="note" id="note">
+        Tip: turn the <strong>Decoder</strong> off to see what a <em>pure</em> JEPA actually gives you —
+        just the 32 latent bars. It understands the bounce perfectly and refuses to draw it. Turn it
+        back on to render the dream. Hit <strong>Inject anomaly</strong> to teleport the logo and watch
+        the surprise meter spike.
+      </div>
+
+      <div class="explain" id="how">
+        <div class="card">
+          <div class="num">01 / predict</div>
+          <h4 style="color: var(--txt)">Future in latent space</h4>
+          <p>
+            The predictor steps one tick forward as a vector, not a picture. Trained to match an EMA
+            target encoder's embedding of the real next frame — the core JEPA objective.
+          </p>
+        </div>
+        <div class="card">
+          <div class="num">02 / render</div>
+          <h4 style="color: var(--txt)">The optional decoder</h4>
+          <p>
+            A pure JEPA has no decoder. Bolt one on and the latent dream becomes pixels — turning the
+            model into a future-frame video predictor you can actually watch.
+          </p>
+        </div>
+        <div class="card">
+          <div class="num">03 / detect</div>
+          <h4 style="color: var(--txt)">Surprise = anomaly</h4>
+          <p>
+            When reality stops matching the rendered expectation, prediction error spikes. That's a
+            usable anomaly signal — the same job a real egocentric-video world model does.
+          </p>
+        </div>
+      </div>
+
+      <footer>
+        DVD-JEPA · an open-source, fully-reproducible JEPA world model (≈10s to train on a CPU). Built
+        as the rigorous sequel to <em>DVD Dreamer</em>. See the
+        <a href="../README.md">paper-style writeup</a> for method, results, and references
+        (LeCun 2022 · I-JEPA · V-JEPA · V-JEPA 2 · VICReg · BYOL).
+      </footer>
+    </div>
+
+    <script type="module">
+      import { loadModel, encode, predict, decode, mse, World } from "./jepa.js";
+
+      const $ = (id) => document.getElementById(id);
+      const realCv = $("real"), dreamCv = $("dream");
+      const realCtx = realCv.getContext("2d"), dreamCtx = dreamCv.getContext("2d");
+      const latCtx = $("latent").getContext("2d"), spCtx = $("spark").getContext("2d");
+
+      let model, world, H, W;
+      let running = true, decoderOn = true, fps = 9, acc = 0, last = 0;
+      let surpBuf = [], dreaming = null;
+
+      function frameToImage(ctx, frame, tint) {
+        const img = ctx.createImageData(W, H);
+        for (let i = 0; i < frame.length; i++) {
+          const v = Math.max(0, Math.min(1, frame[i])) * 255;
+          img.data[i * 4 + 0] = v * tint[0];
+          img.data[i * 4 + 1] = v * tint[1];
+          img.data[i * 4 + 2] = v * tint[2];
+          img.data[i * 4 + 3] = 255;
+        }
+        ctx.putImageData(img, 0, 0);
+      }
+
+      function drawLatent(z) {
+        const c = latCtx, w = c.canvas.width, h = c.canvas.height, n = z.length;
+        c.clearRect(0, 0, w, h);
+        const bw = w / n, mid = h / 2;
+        c.strokeStyle = "#23252f"; c.beginPath(); c.moveTo(0, mid); c.lineTo(w, mid); c.stroke();
+        for (let i = 0; i < n; i++) {
+          const v = Math.max(-12, Math.min(12, z[i])) / 12;
+          const bh = Math.abs(v) * (mid - 2);
+          c.fillStyle = v >= 0 ? "#2bd4ff" : "#5b6cff";
+          c.fillRect(i * bw + 1, v >= 0 ? mid - bh : mid, bw - 2, bh);
+        }
+      }
+
+      function drawSpark() {
+        const c = spCtx, w = c.canvas.width, h = c.canvas.height;
+        c.clearRect(0, 0, w, h);
+        if (surpBuf.length < 2) return;
+        const max = Math.max(0.01, ...surpBuf), n = surpBuf.length;
+        // threshold (median + 5*MAD)
+        const sorted = [...surpBuf].sort((a, b) => a - b);
+        const med = sorted[Math.floor(n / 2)];
+        const mad = [...surpBuf].map((x) => Math.abs(x - med)).sort((a, b) => a - b)[Math.floor(n / 2)];
+        const thr = med + 5 * (mad + 1e-6);
+        const y = (v) => h - 6 - (v / max) * (h - 12);
+        c.strokeStyle = "#ff5d5d"; c.setLineDash([4, 4]); c.beginPath();
+        c.moveTo(0, y(thr)); c.lineTo(w, y(thr)); c.stroke(); c.setLineDash([]);
+        c.strokeStyle = "#2bd4ff"; c.lineWidth = 2; c.beginPath();
+        surpBuf.forEach((v, i) => { const X = (i / (n - 1)) * w; i ? c.lineTo(X, y(v)) : c.moveTo(X, y(v)); });
+        c.stroke();
+        const cur = surpBuf[n - 1];
+        const over = cur > thr && cur > 0.004;
+        $("alarm").classList.toggle("on", over);
+        $("surpVal").textContent = cur.toFixed(4);
+        $("surpVal").style.color = over ? "#ff5d5d" : "#e6e7ee";
+      }
+
+      function pushSurprise(v) { surpBuf.push(v); if (surpBuf.length > 90) surpBuf.shift(); }
+
+      function tick() {
+        const obs = world.obs();
+        const z = encode(model, obs);
+        const exp = decode(model, predict(model, z));
+        // draw reality
+        frameToImage(realCtx, world.cur, [1, 1, 1]);
+        // draw expectation, or the bare latent if decoder is "off"
+        if (decoderOn) {
+          frameToImage(dreamCtx, exp, [0.3, 0.9, 1.0]);
+        } else {
+          dreamCtx.fillStyle = "#06080b"; dreamCtx.fillRect(0, 0, W, H);
+        }
+        drawLatent(z);
+        // advance reality and score the prediction against what actually happened
+        world.step();
+        pushSurprise(mse(exp, world.cur));
+        drawSpark();
+      }
+
+      // multi-step "free dream": freeze reality, roll predictor forward, watch it drift
+      async function dreamAhead(K = 30) {
+        if (dreaming) return;
+        running = false; $("play").textContent = "▶ Play";
+        $("mode").textContent = "mode: free dream (latent rollout)";
+        $("dreamTag").textContent = "rolling out";
+        let z = encode(model, world.obs());
+        for (let k = 1; k <= K; k++) {
+          z = predict(model, z);
+          frameToImage(dreamCtx, decode(model, z), [0.3, 0.9, 1.0]);
+          frameToImage(realCtx, world.cur, [0.25, 0.25, 0.28]); // reality frozen/greyed
+          $("dreamLabel").textContent = `dreaming · t+${k}`;
+          drawLatent(z);
+          await new Promise((r) => setTimeout(r, 90));
+        }
+        $("dreamLabel").textContent = "JEPA's expectation";
+        $("dreamTag").textContent = "decoded";
+        $("mode").textContent = "mode: monitor";
+        dreaming = null; running = true; $("play").textContent = "⏸ Pause";
+      }
+
+      function loop(t) {
+        requestAnimationFrame(loop);
+        if (!running) return;
+        const dt = t - last; last = t; acc += dt;
+        const interval = 1000 / fps;
+        if (acc >= interval) { acc = 0; tick(); }
+      }
+
+      // ---- wiring ----
+      $("play").onclick = () => {
+        running = !running;
+        $("play").textContent = running ? "⏸ Pause" : "▶ Play";
+      };
+      $("reset").onclick = () => { world.reset(); surpBuf = []; };
+      $("anom").onclick = () => { world.teleport(); };
+      $("dreamAhead").onclick = () => dreamAhead(30);
+      $("speed").oninput = (e) => { fps = +e.target.value; };
+      $("decToggle").onclick = () => {
+        decoderOn = !decoderOn;
+        $("decSwitch").classList.toggle("on", decoderOn);
+        $("dreamTag").textContent = decoderOn ? "decoded" : "pure JEPA · vectors only";
+        if (!decoderOn) $("dreamLabel").textContent = "JEPA's expectation (hidden)";
+        else $("dreamLabel").textContent = "JEPA's expectation";
+      };
+
+      // size the helper canvases to their display box for crisp lines
+      function fitCanvas(c) { c.width = c.clientWidth; c.height = c.clientHeight; }
+
+      (async function init() {
+        // set GitHub link if known; harmless placeholder otherwise
+        $("gh").href = "https://github.com/mandarwagh9/dvd-jepa";
+        model = await loadModel("weights.json");
+        H = model.meta.H; W = model.meta.W;
+        realCv.width = W; realCv.height = H;
+        dreamCv.width = W; dreamCv.height = H;
+        [$("latent"), $("spark")].forEach(fitCanvas);
+        world = new World(model.meta);
+        requestAnimationFrame((t) => { last = t; loop(t); });
+      })();
+
+      window.addEventListener("resize", () => [$("latent"), $("spark")].forEach(fitCanvas));
+    </script>
+  </body>
+</html>

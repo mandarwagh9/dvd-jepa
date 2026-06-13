@@ -1,0 +1,15 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+
+# scratch / test artifacts
+_*.png
+web/_*.py
+/tmp/
+
+# NOTE: we intentionally COMMIT these so the project is self-contained and the
+# live demo works without retraining:
+#   web/weights.json   checkpoints/dvd_jepa.pt   assets/*

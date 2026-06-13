@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dvd-jepa"
+version = "0.1.0"
+description = "A tiny, fully-reproducible JEPA world model trained on a bouncing DVD logo."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Mandar Wagh" }]
+keywords = ["jepa", "world-model", "self-supervised", "representation-learning", "video-prediction"]
+dependencies = ["torch>=2.0", "numpy>=1.24", "matplotlib>=3.6", "pillow>=9.0"]
+
+[project.urls]
+Homepage = "https://github.com/mandarwagh9/dvd-jepa"
+Demo = "https://dvd-jepa.vercel.app"
+
+[tool.setuptools]
+packages = ["dvd_jepa"]
