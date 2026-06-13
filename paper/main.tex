@@ -135,34 +135,30 @@ which is what lets it run client-side in ${\sim}40$ lines of JavaScript.}
 
 \begin{figure}[h]
 \centering
-\begin{tikzpicture}[
-  font=\small,
-  box/.style={draw,rounded corners,minimum height=8mm,minimum width=15mm,align=center},
-  enc/.style={box,fill=blue!8},
-  pred/.style={box,fill=green!10},
-  dec/.style={box,fill=gray!8,dashed},
-  >=Latex
-]
-\node (ot) {$o_t$};
-\node[enc,right=8mm of ot] (E1) {$E_\theta$};
-\node[right=7mm of E1] (zt) {$z_t$};
-\node[pred,right=7mm of zt] (P) {$P$};
-\node[right=8mm of P] (zh) {$\hat z_{t+1}$};
-\node[right=10mm of zh] (loss) {$\big\lVert \hat z_{t+1}-\mathrm{sg}(\bar z_{t+1})\big\rVert^2$};
-
-\node[below=10mm of ot] (ot1) {$o_{t+1}$};
-\node[enc,right=8mm of ot1] (E2) {$E_{\bar\theta}$};
-\node[right=7mm of E2] (zb) {$\bar z_{t+1}$};
-
-\node[dec,below=7mm of P] (D) {$D:\,z\!\to\!f$};
-
-\draw[->] (ot) -- (E1); \draw[->] (E1) -- (zt); \draw[->] (zt) -- (P);
-\draw[->] (P) -- (zh); \draw[->] (zh) -- (loss);
-\draw[->] (ot1) -- (E2); \draw[->] (E2) -- (zb);
-\draw[->] (zb) -| (loss);
+\begin{tikzpicture}[font=\small,>=Latex,
+  box/.style={draw,rounded corners,minimum height=8mm,minimum width=13mm,align=center},
+  enc/.style={box,fill=blue!8}, pred/.style={box,fill=green!10}, dec/.style={box,fill=gray!8,dashed}]
+% online (context) path
+\node (ot)   at (0,0)        {$o_t$};
+\node[enc] (E1) at (1.9,0)   {$E_\theta$};
+\node (zt)   at (3.5,0)      {$z_t$};
+\node[pred] (P) at (4.9,0)   {$P$};
+\node (zh)   at (6.6,0)      {$\hat z_{t+1}$};
+\node (loss) at (8.7,-0.75)  {$\big\lVert\,\hat z_{t+1}-\mathrm{sg}(\bar z_{t+1})\,\big\rVert^{2}$};
+% target (EMA, stop-grad) path
+\node (ot1)  at (0.4,-1.5)   {$o_{t+1}$};
+\node[enc] (E2) at (2.4,-1.5) {$E_{\bar\theta}$};
+\node (zb)   at (4.2,-1.5)   {$\bar z_{t+1}$};
+\node[font=\scriptsize,gray] at (2.4,-2.2) {EMA, stop-grad};
+% optional decoder readout, on its own row
+\node[dec] (D) at (3.5,-2.85) {$D:\,z\!\to\!\hat f$};
+\node[font=\scriptsize,gray,anchor=west] at (4.55,-2.85) {optional readout: latent $\to$ pixels};
+% arrows
+\draw[->] (ot)--(E1); \draw[->] (E1)--(zt); \draw[->] (zt)--(P); \draw[->] (P)--(zh);
+\draw[->] (zh) -- (loss.west);
+\draw[->] (ot1)--(E2); \draw[->] (E2)--(zb);
+\draw[->] (zb) -- (loss.west);
 \draw[->,dashed] (zt) -- (D);
-\node[align=center,font=\scriptsize,below=1mm of E2] {EMA, stop-grad};
-\node[align=center,font=\scriptsize,right=1mm of D] {optional readout};
 \end{tikzpicture}
 \caption{DVD-JEPA. The predictor matches the EMA target encoder's embedding of the next observation,
 entirely in latent space ($\mathrm{sg}$ is stop-gradient). The decoder is an optional readout used only
