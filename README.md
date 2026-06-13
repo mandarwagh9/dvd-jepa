@@ -6,6 +6,7 @@
 
 [![Paper (PDF)](https://img.shields.io/badge/📄_paper-PDF-b31b1b)](paper/main.pdf)
 [![Live demo](https://img.shields.io/badge/▶_live_demo-run_in_browser-2bd4ff)](https://dvd-jepa.vercel.app)
+[![HF Space](https://img.shields.io/badge/🤗_Spaces-demo-yellow)](https://huggingface.co/spaces/mandarwagh/dvd-jepa)
 [![Open in Colab](https://img.shields.io/badge/Colab-train_it_yourself-F9AB00?logo=googlecolab&logoColor=white)](https://colab.research.google.com/github/mandarwagh9/dvd-jepa/blob/main/notebooks/dvd_jepa.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![CPU only](https://img.shields.io/badge/hardware-CPU_only-lightgrey)
@@ -96,7 +97,7 @@ All numbers are produced by `python -m dvd_jepa.train` (seed 0, CPU, ~10 s) and 
 
 ## Try it — interactive demo
 
-**▶ [dvd-jepa.vercel.app](https://dvd-jepa.vercel.app)** — the trained model running entirely in your browser (no server, no GPU). Things to do:
+**▶ [dvd-jepa.vercel.app](https://dvd-jepa.vercel.app)** — the trained model running entirely in your browser (no server, no GPU). Also mirrored on [🤗 Hugging Face Spaces](https://huggingface.co/spaces/mandarwagh/dvd-jepa). Things to do:
 
 - **Toggle the decoder off.** This is the *pure JEPA*. It understands the bounce perfectly and gives you nothing but 32 latent bars — it literally cannot draw. Toggle it back on and the dream renders. This is the whole joke, made interactive.
 - **Inject an anomaly.** Teleport the logo and watch the surprise meter spike past the threshold.
